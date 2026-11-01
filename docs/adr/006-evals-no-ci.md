@@ -1,6 +1,6 @@
 # ADR-006: Evals no CI sem LLM e com snapshot reduzido
 
-**Status:** aceito, com a publicação do snapshot pendente · **Data:** 2026-11-01
+**Status:** aceito · **Data:** 2026-11-01
 
 ## Contexto
 
@@ -23,11 +23,10 @@ O plano pede evals em todo PR que altere o agente ou os prompts, sobre um snapsh
 
 **Modelo só sob demanda.** Uma amostra com o modelo local em CPU existe como execução manual. A suíte completa continua local, com `make evals`, e os relatórios ficam em `docs/eval-reports/`.
 
-**Publicação depois de revisão.** O workflow só roda quando a variável `EVAL_SNAPSHOT_TAG` existe, o que acontece depois de o pacote ser aprovado e publicado como Release.
+**Publicação depois de revisão.** O pacote foi revisado e publicado como a Release `evals-snapshot-2026-09`. O workflow usa a variável `EVAL_SNAPSHOT_TAG` para saber qual versão baixar.
 
 ## Consequências
 
 - **Um PR pode piorar o agente sem o CI perceber.** O CI protege dados, guardrails e busca, mas não a qualidade das respostas do LLM. Rodar `make evals` antes de mudar prompts continua sendo disciplina manual.
 - **Um modelo via API mudaria isso.** Com uma chave, a suíte completa caberia no CI, a um custo por execução.
 - **O snapshot publicado contém nomes reais de provedores.** São dados públicos da Anatel. Remover um provedor quebraria totais e market shares.
-- **O caminho de restauração só foi testado localmente** até a primeira publicação.

@@ -121,7 +121,7 @@ Decisões de arquitetura:
 | Fase | Entrega | Situação |
 | --- | --- | --- |
 | 0 | Fundação: repositório, stack local e CI | concluída |
-| 1 | Warehouse, agente text-to-SQL e evals | quase concluída: faltam medir o modelo grande via API e publicar o snapshot das evals |
+| 1 | Warehouse, agente text-to-SQL e evals | quase concluída: falta medir o modelo grande via API |
 | 2 | Grafo de sócios e RAG regulatório | planejada |
 | 3 | Fine-tuning de modelo pequeno para text-to-SQL | planejada |
 | 4 | Ferramentas de ML, segurança, observabilidade e deploy | planejada |
