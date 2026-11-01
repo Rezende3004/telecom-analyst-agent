@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Tabelas carregadas por `telecom_analyst.etl.warehouse`.
+    schema: raw
+    tables:
+      - name: acessos_mensal
+      - name: acessos_faixa_municipio
+      - name: prestadora_mensal
+      - name: total_mensal
+      - name: municipios
+      - name: empresas_receita
+      - name: estabelecimentos_receita
+      - name: naturezas_juridicas
+      - name: snapshot

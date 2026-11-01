@@ -1,0 +1,191 @@
+version: 2
+
+# Este schema é a única parte do banco que o agente enxerga. As descrições viram o contexto
+# de schema do agente e o data-dictionary.md, então escreva para quem vai montar uma consulta.
+
+models:
+  - name: snapshot
+    description: Uma linha com a versão dos dados. Use para informar a data de referência.
+    columns:
+      - name: snapshot_date
+        description: Primeiro dia do último mês disponível na Anatel.
+      - name: receita_mes
+        description: Mês de publicação da base do CNPJ, no formato AAAA-MM.
+
+  - name: municipios
+    description: Um município por linha. Use para filtrar por população, renda, UF ou região.
+    columns:
+      - name: municipio_ibge
+        description: Código do IBGE com 7 dígitos.
+      - name: municipio
+        description: Nome do município com acentos.
+      - name: uf
+        description: Sigla da unidade da federação.
+      - name: uf_nome
+        description: Nome da unidade da federação.
+      - name: regiao
+        description: Grande região, como Centro-Oeste.
+      - name: populacao
+        description: População estimada no ano de `populacao_ano`.
+      - name: populacao_ano
+        description: Ano da estimativa de população.
+      - name: domicilios
+        description: Domicílios particulares permanentes ocupados. Nulo em município criado depois do Censo.
+      - name: domicilios_ano
+        description: Ano do censo que deu origem a `domicilios`.
+      - name: pib_mil_reais
+        description: PIB municipal em milhares de reais.
+      - name: pib_ano
+        description: Ano do PIB.
+      - name: renda_per_capita
+        description: Rendimento nominal médio mensal domiciliar per capita, em reais.
+      - name: renda_ano
+        description: Ano do censo que deu origem à renda.
+
+  - name: provedores
+    description: >
+      Um CNPJ que declara acessos à Anatel. Para somar um grupo inteiro, use `agente_economico`.
+    columns:
+      - name: cnpj
+        description: CNPJ com 14 caracteres, sempre texto, porque pode ser alfanumérico.
+      - name: provedor
+        description: Nome público do provedor. Empresários individuais não aparecem pelo nome civil.
+      - name: grupo_economico
+        description: Grupo mais recente declarado à Anatel. `OUTROS` significa sem grupo informado.
+      - name: agente_economico
+        description: Identificador do grupo, ou a raiz de 8 caracteres do CNPJ quando não há grupo.
+      - name: agente_nome
+        description: Nome legível do agente econômico. Use este nome nas respostas.
+      - name: porte_prestadora
+        description: Grande Porte ou Pequeno Porte, conforme a Anatel.
+      - name: natureza_juridica
+        description: Natureza jurídica na Receita Federal.
+      - name: capital_social
+        description: Capital social em reais.
+      - name: uf_sede
+        description: UF da matriz.
+      - name: data_inicio_atividade
+        description: Data de início de atividade da matriz.
+      - name: situacao_cadastral
+        description: Nula, Ativa, Suspensa, Inapta ou Baixada.
+
+  - name: acessos_mensais
+    description: >
+      Acessos por mês, provedor, município, meio de acesso e tipo de pessoa, com 16 milhões de
+      linhas. Sempre filtre por período. Sempre use SUM(acessos): nunca conte linhas.
+    columns:
+      - name: mes_referencia
+        description: Primeiro dia do mês. De 2007 a 2010 a série é trimestral.
+      - name: municipio
+        description: Nome do município.
+      - name: uf
+        description: Sigla da unidade da federação.
+      - name: regiao
+        description: Grande região.
+      - name: municipio_ibge
+        description: Código do IBGE com 7 dígitos.
+      - name: cnpj
+        description: CNPJ do provedor.
+      - name: provedor
+        description: Nome público do provedor.
+      - name: grupo_economico
+        description: Grupo mais recente, aplicado a toda a série para comparar períodos.
+      - name: agente_economico
+        description: Identificador do grupo, ou a raiz do CNPJ quando não há grupo.
+      - name: agente_nome
+        description: Nome legível do agente econômico. Use este nome nas respostas.
+      - name: meio_acesso
+        description: Fibra, Cabo Coaxial, Cabo Metálico, Rádio, Satélite ou outros.
+      - name: tipo_pessoa
+        description: Pessoa Física, Pessoa Jurídica ou Não Informado. Antes de 2021 é Não Informado.
+      - name: acessos
+        description: Acessos em serviço.
+
+  - name: mercado_municipal
+    description: >
+      Um município por mês, com as métricas já calculadas. É a primeira opção para perguntas de
+      concentração, penetração e crescimento.
+    columns:
+      - name: mes_referencia
+        description: Primeiro dia do mês.
+      - name: municipio
+        description: Nome do município.
+      - name: uf
+        description: Sigla da unidade da federação.
+      - name: regiao
+        description: Grande região.
+      - name: municipio_ibge
+        description: Código do IBGE com 7 dígitos.
+      - name: populacao
+        description: População estimada mais recente.
+      - name: domicilios
+        description: Domicílios do Censo 2022.
+      - name: renda_per_capita
+        description: Renda domiciliar per capita do Censo 2022, em reais.
+      - name: acessos
+        description: Total de acessos no município.
+      - name: acessos_pessoa_fisica
+        description: Acessos de pessoas físicas. Nulo antes de 2021.
+      - name: penetracao_domicilios
+        description: Todos os acessos por 100 domicílios. Pode passar de 100.
+      - name: penetracao_residencial
+        description: Acessos de pessoas físicas por 100 domicílios. Nulo antes de 2021.
+      - name: provedores
+        description: Agentes econômicos com acessos no município.
+      - name: lider
+        description: Nome do agente econômico com mais acessos.
+      - name: lider_agente_economico
+        description: Identificador do líder, igual a `agente_economico` nas outras views.
+      - name: share_lider_pct
+        description: Market share do líder, em pontos percentuais.
+      - name: hhi
+        description: Índice Herfindahl-Hirschman, de 0 a 10.000, por agente econômico.
+      - name: nivel_concentracao
+        description: >
+          Faixa do Guia H do CADE: não concentrado (HHI abaixo de 1.500), moderadamente
+          concentrado (1.500 a 2.500) ou altamente concentrado (acima de 2.500). Um mercado
+          pouco disputado é um mercado altamente concentrado.
+      - name: crescimento_12m_pct
+        description: Variação dos acessos contra o mesmo mês do ano anterior. Nulo se esse mês não existir.
+
+  - name: participacao_provedores
+    description: Market share de cada agente econômico por município e mês.
+    columns:
+      - name: mes_referencia
+        description: Primeiro dia do mês.
+      - name: municipio
+        description: Nome do município.
+      - name: uf
+        description: Sigla da unidade da federação.
+      - name: regiao
+        description: Grande região.
+      - name: municipio_ibge
+        description: Código do IBGE com 7 dígitos.
+      - name: agente_economico
+        description: Identificador do grupo, ou a raiz do CNPJ quando não há grupo.
+      - name: agente_nome
+        description: Nome legível do agente econômico. Use este nome nas respostas.
+      - name: acessos
+        description: Acessos do agente no município.
+      - name: market_share_pct
+        description: Participação do agente nos acessos do município.
+      - name: posicao
+        description: Posição do agente no município, sendo 1 o líder.
+
+  - name: velocidade_municipal
+    description: Acessos por município, mês e faixa de velocidade.
+    columns:
+      - name: mes_referencia
+        description: Primeiro dia do mês.
+      - name: municipio
+        description: Nome do município.
+      - name: uf
+        description: Sigla da unidade da federação.
+      - name: regiao
+        description: Grande região.
+      - name: municipio_ibge
+        description: Código do IBGE com 7 dígitos.
+      - name: faixa_velocidade
+        description: Faixa declarada. Quatro das oito faixas só existem em parte da série.
+      - name: acessos
+        description: Acessos na faixa.

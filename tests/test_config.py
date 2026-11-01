@@ -1,21 +1,9 @@
-from typing import Any
-
 import psycopg.conninfo
 import pytest
 from pydantic import ValidationError
 
 from telecom_analyst.config import Settings
-
-
-def make_settings(**overrides: Any) -> Settings:
-    values: dict[str, Any] = {
-        "postgres_user": "user",
-        "postgres_password": "secret",
-        "postgres_db": "db",
-        "langfuse_public_key": "pk",
-        "langfuse_secret_key": "sk",
-    }
-    return Settings(_env_file=None, **(values | overrides))
+from tests.factories import make_settings
 
 
 def test_conninfo_keeps_special_characters_in_password() -> None:

@@ -27,6 +27,7 @@ jobs:
         with:
           enable-cache: true
       - run: make setup
+      - run: make dbt-parse
       - run: make up
       - run: make test
       - name: Logs da stack

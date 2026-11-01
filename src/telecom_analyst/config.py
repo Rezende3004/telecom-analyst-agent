@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     langfuse_secret_key: SecretStr
 
     data_dir: Path = Path("data")
+    duckdb_memory_limit: str = "6GB"
 
     @property
     def postgres_conninfo(self) -> str:
@@ -41,3 +42,7 @@ class Settings(BaseSettings):
     @property
     def langfuse_url(self) -> str:
         return f"http://localhost:{self.langfuse_port}"
+
+
+def load_settings() -> Settings:
+    return Settings()

@@ -2,7 +2,7 @@
 
 Agente de IA que responde, em português, perguntas analíticas sobre o mercado brasileiro de banda larga fixa, usando só dados públicos e mostrando de onde saiu cada número.
 
-> **Em construção.** Hoje o repositório tem só a fundação: stack local, CI e arquitetura documentada. Nada abaixo sobre o agente existe ainda; as seções descrevem o que está planejado.
+> **Em construção.** O pipeline de dados e o warehouse já funcionam com dados reais até 2026-09. O agente ainda não existe: as seções sobre ele descrevem o que está planejado.
 
 ## O problema
 
@@ -14,6 +14,15 @@ O sistema deve responder perguntas como:
 - Quais grupos econômicos de provedores mais cresceram no Centro-Oeste desde 2022?
 - Quanto o provedor X deve crescer em Anápolis nos próximos 12 meses?
 - O que a regulação exige de um provedor de pequeno porte em relação ao atendimento?
+
+## O que já funciona
+
+- **56,2 milhões de linhas** da Anatel, com os 205 meses idênticos ao total oficial publicado.
+- **24 GB da base do CNPJ** reduzidos ao recorte de telecom em 31 segundos depois de descompactados, sem CPFs nem contatos. O [benchmark](benchmarks/duckdb_vs_spark/README.md) mostra o DuckDB 8 vezes mais rápido que o Spark nesse job.
+- **100% dos CNPJs da Anatel** ligados à Receita pela chave exata.
+- **Warehouse dbt** com 51 modelos e testes, incluindo a conciliação com o total oficial e o bloqueio de CPF nos dados expostos.
+
+Ao longo do caminho, os dados mostraram que a densidade publicada pela Anatel usa população, embora a metodologia diga domicílios. Esse e outros achados estão em [Fontes de dados](docs/data-sources.md), e as colunas em [Dicionário de dados](docs/data-dictionary.md).
 
 ## Arquitetura planejada
 
@@ -55,6 +64,15 @@ make up      # sobe a stack e espera ficar saudável
 make test    # testes unitários e de integração
 ```
 
+Para montar o warehouse com os dados públicos, que baixam cerca de 8 GB:
+
+```bash
+make ingest     # Anatel e IBGE
+make cnpj       # base do CNPJ
+make transform  # carrega o Postgres e roda o dbt
+make snapshot   # congela a versão atual
+```
+
 | Serviço | Endereço local |
 | --- | --- |
 | PostgreSQL + pgvector | `localhost:5433` |
@@ -68,7 +86,7 @@ As portas ficam presas a `127.0.0.1` e podem ser trocadas no `.env`. `make help`
 | Fase | Entrega | Situação |
 | --- | --- | --- |
 | 0 | Fundação: repositório, stack local e CI | concluída |
-| 1 | Warehouse, agente text-to-SQL e evals | planejada |
+| 1 | Warehouse, agente text-to-SQL e evals | em andamento: dados e warehouse prontos |
 | 2 | Grafo de sócios e RAG regulatório | planejada |
 | 3 | Fine-tuning de modelo pequeno para text-to-SQL | planejada |
 | 4 | Ferramentas de ML, segurança, observabilidade e deploy | planejada |

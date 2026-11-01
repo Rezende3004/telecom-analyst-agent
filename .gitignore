@@ -17,6 +17,10 @@ mlruns/
 *.gguf
 *.parquet
 
+# dbt
+dbt/target/
+dbt/logs/
+
 # Notebooks
 .ipynb_checkpoints/
 

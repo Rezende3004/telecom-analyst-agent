@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: dim_municipio
+    description: Um município por código do IBGE, com população, domicílios, PIB e renda.
+    columns:
+      - name: municipio_ibge
+        data_tests: [unique, not_null]
+      - name: uf
+        data_tests: [not_null]
+      - name: populacao
+        data_tests: [not_null]
+
+  - name: dim_empresa
+    description: >
+      Um CNPJ declarante da Anatel, com o grupo mais recente e o cadastro da Receita.
+    columns:
+      - name: cnpj
+        data_tests: [unique, not_null]
+      - name: nome_publico
+        data_tests: [not_null]
+      - name: agente_economico
+        data_tests: [not_null]
+
+  - name: dim_agente
+    description: Um agente econômico, com o nome usado nas respostas.
+    columns:
+      - name: agente_economico
+        data_tests: [unique, not_null]
+      - name: agente_nome
+        data_tests: [not_null]
+
+  - name: dim_tempo
+    description: Um mês da série da Anatel.
+    columns:
+      - name: mes_referencia
+        data_tests: [unique, not_null]
+
+  - name: fato_acessos_mensal
+    description: >
+      Acessos por mês, CNPJ, município, meio de acesso e tipo de pessoa. Tecnologia e velocidade
+      ficam de fora: os nomes mudam ao longo da série e os valores têm erros de declaração.
+    columns:
+      - name: mes_referencia
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_tempo')
+                field: mes_referencia
+      - name: cnpj
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_empresa')
+                field: cnpj
+      - name: municipio_ibge
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_municipio')
+                field: municipio_ibge
+      - name: acessos
+        data_tests: [not_null]
+
+  - name: fato_velocidade_municipal
+    description: Acessos por mês, município e faixa de velocidade declarada.
+
+  - name: fato_participacao_agente
+    description: Market share de cada agente econômico por mês e município.
+    columns:
+      - name: agente_economico
+        data_tests: [not_null]
+      - name: market_share_pct
+        data_tests: [not_null]
+
+  - name: fato_mercado_municipal
+    description: Um município por mês, com penetração, concentração e crescimento.
+    columns:
+      - name: hhi
+        data_tests: [not_null]
+      - name: nivel_concentracao
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [não concentrado, moderadamente concentrado, altamente concentrado]
