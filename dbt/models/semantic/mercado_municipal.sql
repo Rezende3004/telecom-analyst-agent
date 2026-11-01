@@ -13,7 +13,6 @@ select
     round(mercado.penetracao_residencial::numeric, 2) as penetracao_residencial,
     mercado.provedores,
     agentes.agente_nome as lider,
-    mercado.lider as lider_agente_economico,
     round(mercado.share_lider_pct::numeric, 2) as share_lider_pct,
     round(mercado.hhi::numeric, 0) as hhi,
     mercado.nivel_concentracao,

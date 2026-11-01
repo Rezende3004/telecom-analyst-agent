@@ -44,7 +44,6 @@ Um município por mês, com as métricas já calculadas. É a primeira opção p
 | `penetracao_residencial` | Acessos de pessoas físicas por 100 domicílios. Nulo antes de 2021. |
 | `provedores` | Agentes econômicos com acessos no município. |
 | `lider` | Nome do agente econômico com mais acessos. |
-| `lider_agente_economico` | Identificador do líder, igual a `agente_economico` nas outras views. |
 | `share_lider_pct` | Market share do líder, em pontos percentuais. |
 | `hhi` | Índice Herfindahl-Hirschman, de 0 a 10.000, por agente econômico. |
 | `nivel_concentracao` | Faixa do Guia H do CADE: não concentrado (HHI abaixo de 1.500), moderadamente concentrado (1.500 a 2.500) ou altamente concentrado (acima de 2.500). Um mercado pouco disputado é um mercado altamente concentrado. |
@@ -69,6 +68,17 @@ Um município por linha. Use para filtrar por população, renda, UF ou região.
 | `pib_ano` | Ano do PIB. |
 | `renda_per_capita` | Rendimento nominal médio mensal domiciliar per capita, em reais. |
 | `renda_ano` | Ano do censo que deu origem à renda. |
+
+## `semantic.nomes_provedores`
+
+Todos os nomes pelos quais um provedor é conhecido, como marca, razão social e nome antigo. Prefira a ferramenta `find_provider`, que tolera erros de grafia.
+
+| Coluna | Descrição |
+| --- | --- |
+| `nome` | Nome conhecido do provedor. |
+| `agente_nome` | Nome a usar nos filtros das outras views. |
+| `agente_economico` | Identificador do grupo, ou a raiz do CNPJ quando não há grupo. |
+| `acessos_atuais` | Acessos do agente no mês mais recente. |
 
 ## `semantic.participacao_provedores`
 

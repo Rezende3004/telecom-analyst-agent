@@ -12,6 +12,7 @@ from typing import NamedTuple
 
 import duckdb
 import psycopg
+from psycopg import sql
 
 from telecom_analyst.config import Settings
 from telecom_analyst.etl import cnpj
@@ -21,6 +22,11 @@ from telecom_analyst.ingest import anatel, ibge
 logger = logging.getLogger(__name__)
 
 COPY_BLOCK = 1024 * 1024
+AGENT_ROLE_SETTINGS = {
+    "default_transaction_read_only": "on",
+    "statement_timeout": "5s",
+    "search_path": "semantic",
+}
 
 
 class Table(NamedTuple):
@@ -109,6 +115,24 @@ def _load(
     logger.info("raw.%s carregada", table.name)
 
 
+def ensure_agent_role(postgres: psycopg.Connection, user: str, password: str) -> None:
+    """Cria o usuário do agente. O dbt concede acesso só às views de `semantic`."""
+    role = sql.Identifier(user)
+    exists = postgres.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (user,)).fetchone()
+    verb = "ALTER" if exists else "CREATE"
+    postgres.execute(
+        sql.SQL("{} ROLE {} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD {}").format(
+            sql.SQL(verb), role, sql.Literal(password)
+        )
+    )
+    for setting, value in AGENT_ROLE_SETTINGS.items():
+        postgres.execute(
+            sql.SQL("ALTER ROLE {} SET {} = {}").format(
+                role, sql.Identifier(setting), sql.Literal(value)
+            )
+        )
+
+
 def load(settings: Settings, month: str, snapshot: str) -> None:
     """Carrega todas as fontes. `month` é o mês da Receita; `snapshot`, o último mês da Anatel."""
     definitions = tables(
@@ -123,6 +147,9 @@ def load(settings: Settings, month: str, snapshot: str) -> None:
         psycopg.connect(settings.postgres_conninfo) as postgres,
     ):
         postgres.execute("CREATE SCHEMA IF NOT EXISTS raw")
+        ensure_agent_role(
+            postgres, settings.agent_db_user, settings.agent_db_password.get_secret_value()
+        )
         for table in definitions:
             _load(duck, postgres, table, Path(workdir))
         postgres.execute("DROP TABLE IF EXISTS raw.snapshot CASCADE")

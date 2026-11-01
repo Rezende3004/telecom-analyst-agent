@@ -18,8 +18,10 @@ Aplicar minimização antes de os dados chegarem ao warehouse:
 - **Remoção de CPF:** sequências de 11 dígitos saem da razão social e do nome fantasia. Um contrato pandera falha se alguma sobrar.
 - **Campos descartados:** endereço, CEP, telefone, e-mail, nome do representante legal e faixa etária nunca saem dos arquivos brutos.
 - **Nome público:** empresários individuais (natureza 2135) aparecem pelo nome fantasia ou como `Empresário individual` mais a raiz do CNPJ.
+- **Nomes da Anatel:** o CPF também aparece nos nomes declarados à Anatel, então a remoção vale ali. Um nome fantasia igual à razão social de um empresário individual é tratado como nome civil.
+- **Busca de provedores:** nenhum nome igual à razão social de um empresário individual entra em `nomes_provedores`, mesmo vindo de outro CNPJ.
 - **Sócios:** a tabela fica no staging local e não é carregada no Postgres. O agente nunca a enxerga.
-- **Teste:** `semantic_sem_cpf` falha se um nome exposto tiver formato de CPF.
+- **Testes:** `semantic_sem_cpf`, `nomes_sem_cpf` e `nomes_sem_empresario_individual` falham se um nome exposto tiver formato de CPF ou repetir um nome civil. Eles já barraram 13 nomes com CPF e 11 nomes civis ao trazer os nomes da Anatel para o warehouse.
 
 ## Consequências
 

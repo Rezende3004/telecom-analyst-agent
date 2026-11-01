@@ -22,6 +22,14 @@ class Settings(BaseSettings):
     langfuse_public_key: str
     langfuse_secret_key: SecretStr
 
+    agent_db_user: str = "agent_ro"
+    agent_db_password: SecretStr = SecretStr("")
+
+    llm_model: str = "ollama_chat/qwen3.5:4b"
+    llm_api_base: str | None = "http://localhost:11434"
+    llm_context_tokens: int = 8192
+    agent_max_steps: int = 6
+
     data_dir: Path = Path("data")
     duckdb_memory_limit: str = "6GB"
 
@@ -33,6 +41,16 @@ class Settings(BaseSettings):
             dbname=self.postgres_db,
             user=self.postgres_user,
             password=self.postgres_password.get_secret_value(),
+        )
+
+    @property
+    def agent_conninfo(self) -> str:
+        return make_conninfo(
+            host=self.postgres_host,
+            port=self.postgres_port,
+            dbname=self.postgres_db,
+            user=self.agent_db_user,
+            password=self.agent_db_password.get_secret_value(),
         )
 
     @property

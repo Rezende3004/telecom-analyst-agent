@@ -1,0 +1,52 @@
+name: Evals
+
+on:
+  pull_request:
+    paths:
+      - "src/telecom_analyst/agent/**"
+      - "evals/**"
+      - "dbt/models/semantic/**"
+      - "docs/data-dictionary.md"
+  workflow_dispatch:
+    inputs:
+      llm_sample:
+        description: "Perguntas a rodar com o modelo local em CPU. Cada uma leva vários minutos."
+        default: "0"
+
+permissions:
+  contents: read
+
+env:
+  SNAPSHOT_DATABASE: telecom_eval
+
+jobs:
+  offline:
+    # Só roda depois de o snapshot reduzido ser publicado como Release.
+    if: vars.EVAL_SNAPSHOT_TAG != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+      - run: make setup
+      - run: docker compose up -d --wait postgres
+      - name: Baixa e restaura o snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOT_TAG: ${{ vars.EVAL_SNAPSHOT_TAG }}
+        run: |
+          mkdir -p data/snapshots/evals
+          gh release download "$SNAPSHOT_TAG" --pattern 'evals-snapshot.tar.gz' --output snapshot.tar.gz
+          tar -xzf snapshot.tar.gz -C data/snapshots/evals
+          make eval-restore EVAL_SNAPSHOT=data/snapshots/evals
+      - run: make evals-offline
+      - name: Amostra com o modelo local
+        if: github.event_name == 'workflow_dispatch' && inputs.llm_sample != '0'
+        env:
+          POSTGRES_DB: ${{ env.SNAPSHOT_DATABASE }}
+          LLM_SAMPLE: ${{ inputs.llm_sample }}
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama pull qwen3.5:4b
+          uv run python -m evals.run_evals --split all --label ci --limit "$LLM_SAMPLE"

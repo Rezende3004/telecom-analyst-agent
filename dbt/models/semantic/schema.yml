@@ -69,6 +69,20 @@ models:
       - name: situacao_cadastral
         description: Nula, Ativa, Suspensa, Inapta ou Baixada.
 
+  - name: nomes_provedores
+    description: >
+      Todos os nomes pelos quais um provedor é conhecido, como marca, razão social e nome antigo.
+      Prefira a ferramenta `find_provider`, que tolera erros de grafia.
+    columns:
+      - name: nome
+        description: Nome conhecido do provedor.
+      - name: agente_nome
+        description: Nome a usar nos filtros das outras views.
+      - name: agente_economico
+        description: Identificador do grupo, ou a raiz do CNPJ quando não há grupo.
+      - name: acessos_atuais
+        description: Acessos do agente no mês mais recente.
+
   - name: acessos_mensais
     description: >
       Acessos por mês, provedor, município, meio de acesso e tipo de pessoa, com 16 milhões de
@@ -134,8 +148,6 @@ models:
         description: Agentes econômicos com acessos no município.
       - name: lider
         description: Nome do agente econômico com mais acessos.
-      - name: lider_agente_economico
-        description: Identificador do líder, igual a `agente_economico` nas outras views.
       - name: share_lider_pct
         description: Market share do líder, em pontos percentuais.
       - name: hhi

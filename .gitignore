@@ -16,6 +16,7 @@ data/*
 mlruns/
 *.gguf
 *.parquet
+snapshot.tar.gz
 
 # dbt
 dbt/target/

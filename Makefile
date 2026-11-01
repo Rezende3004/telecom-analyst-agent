@@ -1,5 +1,9 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup up down ingest cnpj transform snapshot dbt-parse test test-unit lint format
+SPLIT ?= dev
+LABEL ?= local
+DATASET ?= evals/datasets/sql.jsonl
+EVAL_SNAPSHOT ?= data/snapshots/evals-2026-09
+.PHONY: help setup up down ingest cnpj transform snapshot dbt-parse api ui evals eval-snapshot eval-restore evals-offline test test-unit lint format
 
 help: ## Lista os alvos disponíveis
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -38,6 +42,24 @@ snapshot: ## Congela marts e semantic em data/snapshots/AAAA-MM
 		> data/snapshots/$$period/warehouse.dump; \
 	sha256sum data/snapshots/$$period/warehouse.dump > data/snapshots/$$period/warehouse.dump.sha256; \
 	echo "snapshot $$period gravado"
+
+api: ## Sobe a API do agente na porta 8010
+	uv run uvicorn telecom_analyst.api.main:app --port 8010
+
+ui: ## Sobe a tela de demonstração na porta 8501
+	uv run streamlit run ui/app.py
+
+evals: ## Roda as perguntas golden. Uso: make evals SPLIT=dev LABEL=v1
+	uv run python -m evals.run_evals --split $(SPLIT) --label $(LABEL) --dataset $(DATASET)
+
+eval-snapshot: ## Gera o snapshot reduzido das evals
+	uv run python -m evals.snapshot export $(EVAL_SNAPSHOT)
+
+eval-restore: ## Restaura o snapshot reduzido no banco telecom_eval
+	uv run python -m evals.snapshot load $(EVAL_SNAPSHOT) telecom_eval
+
+evals-offline: ## Confere referências e busca de provedores, sem LLM, no banco telecom_eval
+	POSTGRES_DB=telecom_eval uv run python -m evals.check_offline
 
 test: ## Roda todos os testes (precisa de make up)
 	uv run pytest
