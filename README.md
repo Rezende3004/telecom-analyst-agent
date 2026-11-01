@@ -99,6 +99,23 @@ O CI confere SQLs de referência, guardrails e busca de provedores, sem LLM. A s
 
 As portas ficam presas a `127.0.0.1` e podem ser trocadas no `.env`. `make help` lista todos os alvos.
 
+## Documentação
+
+| Assunto | Onde |
+| --- | --- |
+| Resultados do agente | [Relatório v2](docs/eval-reports/v2.md), [relatório v1](docs/eval-reports/v1.md) e [comparação de modelos](docs/eval-reports/model-selection.md) |
+| Dados | [Fontes de dados](docs/data-sources.md) e [dicionário de dados](docs/data-dictionary.md) |
+| Benchmarks | [DuckDB contra Spark](benchmarks/duckdb_vs_spark/README.md) e [Jaro-Winkler contra rapidfuzz](benchmarks/string_similarity/README.md) |
+
+Decisões de arquitetura:
+
+- [ADR-001](docs/adr/001-arquitetura-geral.md): arquitetura geral
+- [ADR-002](docs/adr/002-warehouse-no-postgres.md): dbt no Postgres sobre dados agregados
+- [ADR-003](docs/adr/003-dados-pessoais.md): dados pessoais em uma demo pública
+- [ADR-004](docs/adr/004-duckdb-em-vez-de-spark.md): DuckDB em vez de Spark
+- [ADR-005](docs/adr/005-ligacao-anatel-receita.md): ligação entre Anatel e Receita por chave exata
+- [ADR-006](docs/adr/006-evals-no-ci.md): evals no CI sem LLM
+
 ## Roteiro
 
 | Fase | Entrega | Situação |
