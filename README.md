@@ -67,7 +67,7 @@ As portas ficam presas a `127.0.0.1` e podem ser trocadas no `.env`. `make help`
 
 | Fase | Entrega | Situação |
 | --- | --- | --- |
-| 0 | Fundação: repositório, stack local e CI | em andamento |
+| 0 | Fundação: repositório, stack local e CI | concluída |
 | 1 | Warehouse, agente text-to-SQL e evals | planejada |
 | 2 | Grafo de sócios e RAG regulatório | planejada |
 | 3 | Fine-tuning de modelo pequeno para text-to-SQL | planejada |
